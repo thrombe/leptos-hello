@@ -51,7 +51,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "dist/*"
-          target: "/etc/nginx/sites-available/test1/"
+          target: "/var/www/test1/"
 
       # This step connects to your server and runs the restart command
       - name: Restart service on server
