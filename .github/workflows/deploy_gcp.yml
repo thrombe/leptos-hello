@@ -1,0 +1,63 @@
+
+# .github/workflows/deploy.yml
+
+name: Deploy Rust Binary
+
+# Trigger the workflow on pushes to the main branch
+on:
+  push:
+    branches:
+      - master
+
+env:
+  # The name of your Rust binary
+  BINARY_NAME: test1
+  # The target architecture for your server (most Linux servers are x86_64)
+  # For ARM servers (like Raspberry Pi or AWS Graviton), use aarch64-unknown-linux-gnu
+  RUST_TARGET: x86_64-unknown-linux-gnu
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Rust target for cross-compilation
+        run: rustup target add ${{ env.RUST_TARGET }}
+
+      # Use a cache to speed up subsequent builds
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ env.RUST_TARGET }}
+
+      - name: Build release binary
+        run: cargo build --release --target ${{ env.RUST_TARGET }}
+
+      # This step copies the built binary from the GitHub runner to your server
+      - name: Deploy with SCP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "target/${{ env.RUST_TARGET }}/release/${{ env.BINARY_NAME }}"
+          target: "/home/${{ secrets.SSH_USER }}/app/"
+          strip_components: 3 # Removes the 'target/.../release' part of the path
+
+      # This step connects to your server and runs the restart command
+      - name: Restart service on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo systemctl restart ${{ env.BINARY_NAME }}.service
+            echo "Service restarted successfully!"
