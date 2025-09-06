@@ -1,0 +1,32 @@
+# /etc/nginx/sites-available/<name>
+
+server {
+    # Listen on port 80 for incoming HTTP requests
+    listen 80;
+    listen [::]:80;
+
+    # IMPORTANT: Replace this with your server's public IP or your domain name
+    server_name 46.62.206.149;
+
+    # IMPORTANT: This path MUST match the 'REMOTE_WEB_ROOT' in your deploy.yml
+    root /var/www/test1;
+
+    # The default file to serve if a directory is requested
+    index index.html;
+
+    # This is the main location block for your frontend.
+    # It handles serving static files and routing for your Single Page App (SPA).
+    location / {
+        # try_files is crucial for SPAs. It tells Nginx:
+        # 1. Look for a file with the exact name ($uri).
+        # 2. If not found, look for a directory with that name ($uri/).
+        # 3. If still not found, serve /index.html and let the Wasm router handle the URL.
+        try_files $uri $uri/ /index.html;
+    }
+
+
+    # Optional but recommended: Ensure .wasm files are served with the correct MIME type
+    location ~ \.wasm$ {
+        add_header Content-Type application/wasm;
+    }
+}
