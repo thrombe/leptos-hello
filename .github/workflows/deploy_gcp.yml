@@ -10,10 +10,6 @@ on:
       - master
 
 env:
-  # The name of your Rust binary
-  BINARY_NAME: test1
-  # The target architecture for your server (most Linux servers are x86_64)
-  # For ARM servers (like Raspberry Pi or AWS Graviton), use aarch64-unknown-linux-gnu
   RUST_TARGET: x86_64-unknown-linux-gnu
   SSH_HOST: 46.62.206.149
   SSH_USER: root
@@ -43,24 +39,9 @@ jobs:
         with:
           key: ${{ env.RUST_TARGET }}
 
-      # - name: Build release binary
-      #   run: cargo build --release --target ${{ env.RUST_TARGET }}
-
       - name: Build frontend with Trunk
         run: trunk build --release
-        working-directory: ${{ env.FRONTEND_DIR }} # Runs the command inside the frontend directory
-
-
-      # This step copies the built binary from the GitHub runner to your server
-      # - name: Deploy with SCP
-      #   uses: appleboy/scp-action@master
-      #   with:
-      #     host: ${{ env.SSH_HOST }}
-      #     username: ${{ env.SSH_USER }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     source: "target/${{ env.RUST_TARGET }}/release/${{ env.BINARY_NAME }}"
-      #     target: "/home/${{ env.SSH_USER }}/app/"
-      #     strip_components: 3 # Removes the 'target/.../release' part of the path
+        working-directory: ${{ env.FRONTEND_DIR }}
 
       - name: Deploy Frontend Assets with SCP
         uses: appleboy/scp-action@master
@@ -69,7 +50,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "${{ env.FRONTEND_DIR }}/dist/*"
-          target: "/home/${{ env.SSH_USER }}/app/"
+          target: "/etc/nginx/sites-available/test1/"
 
       # This step connects to your server and runs the restart command
       - name: Restart service on server
@@ -79,5 +60,5 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo systemctl restart ${{ env.BINARY_NAME }}.service
+            sudo systemctl start nginx.service
             echo "Service restarted successfully!"
