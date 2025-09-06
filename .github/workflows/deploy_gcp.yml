@@ -13,7 +13,6 @@ env:
   RUST_TARGET: x86_64-unknown-linux-gnu
   SSH_HOST: 46.62.206.149
   SSH_USER: root
-  FRONTEND_DIR: dist
 
 jobs:
   build-and-deploy:
@@ -40,7 +39,7 @@ jobs:
       - name: Cache Cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ env.RUST_TARGET }}
+          key: wasm32-unknown-unknown
 
       - name: Build frontend with Trunk
         run: trunk build --release
@@ -51,7 +50,7 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "${{ env.FRONTEND_DIR }}/dist/*"
+          source: "dist/*"
           target: "/etc/nginx/sites-available/test1/"
 
       # This step connects to your server and runs the restart command
