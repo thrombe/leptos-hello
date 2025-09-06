@@ -1,5 +1,5 @@
 use leptos::prelude::*;
 
 fn main() {
-    leptos::mount::mount_to_body(|| view! { <p>"Hello, Yash!"</p> })
+    leptos::mount::mount_to_body(|| view! { <p>"Hello, everyone!"</p> })
 }
