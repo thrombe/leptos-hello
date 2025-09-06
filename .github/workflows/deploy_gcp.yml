@@ -15,6 +15,8 @@ env:
   # The target architecture for your server (most Linux servers are x86_64)
   # For ARM servers (like Raspberry Pi or AWS Graviton), use aarch64-unknown-linux-gnu
   RUST_TARGET: x86_64-unknown-linux-gnu
+  SSH_HOST: 46.62.206.149
+  SSH_USER: root
 
 jobs:
   build-and-deploy:
@@ -44,19 +46,19 @@ jobs:
       - name: Deploy with SCP
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "target/${{ env.RUST_TARGET }}/release/${{ env.BINARY_NAME }}"
-          target: "/home/${{ secrets.SSH_USER }}/app/"
+          target: "/home/${{ env.SSH_USER }}/app/"
           strip_components: 3 # Removes the 'target/.../release' part of the path
 
       # This step connects to your server and runs the restart command
       - name: Restart service on server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo systemctl restart ${{ env.BINARY_NAME }}.service
