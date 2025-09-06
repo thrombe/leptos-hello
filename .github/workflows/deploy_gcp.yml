@@ -30,6 +30,10 @@ jobs:
           # ## ADDED ##: Ensure wasm target is available for Trunk
           targets: wasm32-unknown-unknown
 
+       ## ADDED ## - Install Trunk build tool
+      - name: Install Trunk
+        run: cargo install trunk
+
       - name: Add Rust target for cross-compilation
         run: rustup target add ${{ env.RUST_TARGET }}
 
