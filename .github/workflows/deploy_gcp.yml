@@ -50,8 +50,9 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/."
+          source: "dist"
           target: "/var/www/test1"
+          strip_components: 1
 
       # This step connects to your server and runs the restart command
       - name: Restart service on server
