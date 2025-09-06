@@ -128,6 +128,9 @@
 
       packages = pkgs:
         (with pkgs; [
+          # rustup
+          trunk
+          cargo-binstall
           cargo
           rustc
           rust-analyzer
